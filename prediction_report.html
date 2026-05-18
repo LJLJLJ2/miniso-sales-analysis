@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MINISO 2023 销量预测模型 — 方案二</title>
+<style>
+  :root {
+    --primary: #1b4b5e; --accent: #e8733a; --blue: #4ca6ba; --gold: #c39858; --purple: #8e6c8a;
+    --bg: #f8f9fa; --card: #ffffff; --text: #2c3e50; --text-light: #5a6c7d;
+    --border: #e2e8f0; --success: #27ae60; --warning: #f39c12; --danger: #e74c3c;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: "PingFang SC","Heiti TC","Hiragino Sans GB","Microsoft YaHei",sans-serif; background: var(--bg); color: var(--text); line-height: 1.8; }
+
+  .hero { background: linear-gradient(135deg, #1b4b5e 0%, #0d3140 100%); color: #fff; padding: 55px 5% 45px; text-align: center; margin-bottom: 40px; }
+  .hero h1 { font-size: 2em; font-weight: 800; letter-spacing: 1px; margin-bottom: 6px; }
+  .hero p { color: rgba(255,255,255,0.65); font-size: 0.95em; }
+  .hero .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; max-width: 700px; margin: 28px auto 0; }
+  .hero .kpi-card { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; padding: 18px 14px; }
+  .hero .kpi-value { font-size: 1.5em; font-weight: 800; color: #fff; }
+  .hero .kpi-value.good { color: #27ae60; }
+  .hero .kpi-label { font-size: 0.8em; color: rgba(255,255,255,0.55); margin-top: 4px; }
+
+  .container { max-width: 1000px; margin: 0 auto; padding: 0 5%; }
+  .section { margin: 45px 0; }
+  .section-title { font-size: 1.4em; font-weight: 700; color: var(--primary); padding-bottom: 10px; border-bottom: 3px solid var(--accent); display: inline-block; margin-bottom: 24px; }
+
+  .card { background: var(--card); border-radius: 12px; padding: 26px 30px; box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.03); margin-bottom: 22px; }
+  .card h3 { font-size: 1.1em; color: var(--primary); margin-bottom: 14px; }
+
+  .chart-wrapper { text-align: center; margin: 24px 0; }
+  .chart-wrapper img { max-width: 100%; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+  .chart-caption { font-size: 0.85em; color: var(--text-light); margin-top: 8px; }
+
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 0.9em; }
+  thead th { background: var(--primary); color: #fff; padding: 10px 14px; font-weight: 600; font-size: 0.85em; text-align: center; }
+  thead th:first-child { border-radius: 6px 0 0 0; } thead th:last-child { border-radius: 0 6px 0 0; }
+  tbody td { padding: 9px 14px; text-align: center; border-bottom: 1px solid var(--border); }
+  tbody tr:hover { background: #f5f8fa; }
+  .td-left { text-align: left !important; }
+  .best { color: var(--success); font-weight: 700; }
+
+  .insight { background: #fef9e7; border-left: 4px solid #f0c060; padding: 14px 18px; border-radius: 0 8px 8px 0; margin: 18px 0; font-size: 0.9em; }
+  .insight strong { color: #b8860b; }
+  .insight.blue { border-left-color: var(--blue); background: #f0f7f9; }
+  .insight.blue strong { color: var(--blue); }
+  .insight.green { border-left-color: var(--success); background: #f0faf4; }
+  .insight.green strong { color: var(--success); }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  .stat-row { display: flex; gap: 12px; flex-wrap: wrap; margin: 14px 0; }
+  .stat-badge { background: #f0f4f7; border-radius: 8px; padding: 12px 16px; text-align: center; flex: 1; min-width: 100px; }
+  .stat-badge .val { font-size: 1.2em; font-weight: 700; color: var(--primary); }
+  .stat-badge .lbl { font-size: 0.78em; color: var(--text-light); margin-top: 2px; }
+
+  .step-list { list-style: none; padding: 0; }
+  .step-list li { padding: 8px 0 8px 28px; position: relative; font-size: 0.92em; }
+  .step-list li::before { content: '▸'; position: absolute; left: 4px; color: var(--accent); font-weight: 700; }
+
+  .concept-box { background: #eaf2f5; border-radius: 10px; padding: 20px 24px; margin: 18px 0; }
+  .concept-box h4 { color: var(--primary); margin-bottom: 10px; }
+  .concept-box p { font-size: 0.9em; margin-bottom: 6px; }
+
+  .footer { text-align: center; padding: 40px 5%; color: var(--text-light); font-size: 0.85em; border-top: 1px solid var(--border); margin-top: 50px; }
+
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 0.78em; font-weight: 600; margin: 0 2px; }
+  .badge.rf { background: #e8f4f8; color: #1b4b5e; }
+  .badge.arima { background: #fef3e2; color: #e8733a; }
+  .badge.xgb { background: #e8f0f4; color: #4ca6ba; }
+</style>
+</head>
+<body>
+
+<!-- ═══════ Hero ═══════ -->
+<div class="hero">
+  <h1>MINISO 2023 销量预测模型</h1>
+  <p>方案二：机器学习预测"明天某产品能卖多少件"</p>
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-value good">R² = 0.66</div>
+      <div class="kpi-label">Random Forest / XGBoost</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-value">±16.2 件</div>
+      <div class="kpi-label">平均预测误差 (MAE)</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-value">3 模型</div>
+      <div class="kpi-label">RF · XGBoost · ARIMA</div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ═══════ 1. 概述 ═══════ -->
+<div class="section">
+  <h2 class="section-title">一、项目概述</h2>
+  <div class="card">
+    <h3>我们要解决什么问题？</h3>
+    <p style="font-size:0.92em;">门店每天要决定每款产品备多少货。备多了占库存，备少了丢销售。<strong>如果能提前知道明天大概卖多少件，就能精准备货。</strong>本项目用 2023年1-11月的数据训练模型，预测12月的销量，看哪种方法最准。</p>
+    <div class="stat-row" style="margin-top:16px;">
+      <div class="stat-badge"><div class="val">8,350</div><div class="lbl">训练数据行数<br>(1月~11月)</div></div>
+      <div class="stat-badge"><div class="val">775</div><div class="lbl">测试数据行数<br>(12月)</div></div>
+      <div class="stat-badge"><div class="val">24 款产品</div><div class="lbl">每款产品每天<br>独立预测</div></div>
+      <div class="stat-badge"><div class="val">22 个特征</div><div class="lbl">时间+价格+促销<br>+天气+历史销量</div></div>
+    </div>
+    <p style="font-size:0.85em;color:var(--text-light);margin-top:8px;">
+      使用工具：<span class="badge rf">Random Forest (scikit-learn)</span> <span class="badge arima">ARIMA (statsmodels)</span> <span class="badge xgb">XGBoost (需libomp)</span>
+    </p>
+  </div>
+</div>
+
+<!-- ═══════ 2. 数据准备 ═══════ -->
+<div class="section">
+  <h2 class="section-title">二、数据准备：哪些数据能用、哪些不能用？</h2>
+
+  <div class="card">
+    <h3>关键概念：数据泄露（Data Leak）</h3>
+    <p style="font-size:0.92em;">这是预测建模中<strong>最容易犯也是最致命的错误</strong>——把预测时根本不知道的信息喂给模型。</p>
+
+    <div class="concept-box">
+      <h4>打个比方</h4>
+      <p>你要预测明天股票涨跌，但你的模型里有一个特征是"明天收盘价"——那模型当然100%准。但明天收盘价在你预测时根本不知道。这就叫<strong>数据泄露</strong>。模型训练时看起来很厉害，实际一用就废。</p>
+    </div>
+
+    <p style="font-size:0.92em;margin-top:14px;">本项目明确排除以下 3 个泄露特征：</p>
+    <table>
+      <thead><tr><th>被排除的列</th><th>为什么不能用</th></tr></thead>
+      <tbody>
+        <tr><td class="td-left"><strong>sales_amount（营收）</strong></td><td class="td-left">营收 = 销量 × 单价。既然你知道营收，你当然知道销量——它直接包含了目标变量信息</td></tr>
+        <tr><td class="td-left"><strong>inventory（库存）</strong></td><td class="td-left">当天库存量在当天结束后才知道。你预测明天销量时，手头只有昨天的库存盘点数据</td></tr>
+        <tr><td class="td-left"><strong>turnover_rate（周转率）</strong></td><td class="td-left">周转率 = 销量 ÷ 库存，销量都不知道，周转率更不可能知道</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>22个特征分为四类</h3>
+    <table>
+      <thead><tr><th>类别</th><th>具体特征</th><th>预测时能拿到吗？</th></tr></thead>
+      <tbody>
+        <tr><td class="td-left"><strong>时间特征</strong></td><td class="td-left">月份、星期几、第几天、第几周、季度、是否节假日</td><td>✅ 日历上就有</td></tr>
+        <tr><td class="td-left"><strong>产品属性</strong></td><td class="td-left">品类编码、产品编码、价格档位、单价</td><td>✅ 产品信息不变</td></tr>
+        <tr><td class="td-left"><strong>外部因素</strong></td><td class="td-left">天气编码、季节编码、促销类型编码</td><td>✅ 天气预报+促销排期</td></tr>
+        <tr><td class="td-left"><strong>历史数据</strong></td><td class="td-left">昨天/7天前/30天前销量、近7天/30天均值、近7天标准差</td><td>✅ 从历史记录算</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════ 3. 训练/测试划分 ═══════ -->
+<div class="section">
+  <h2 class="section-title">三、训练与测试：为什么不能随机抽样？</h2>
+  <div class="card">
+    <div class="grid-2">
+      <div>
+        <h3 style="color:var(--danger);">❌ 错误做法：随机划分</h3>
+        <p style="font-size:0.9em;">把全年数据随机打乱，80%训练，20%测试。问题是：6月的记录可能被丢进测试集，1月的记录在训练集——模型用"未来"学了"过去"。这在现实中没有意义。</p>
+      </div>
+      <div>
+        <h3 style="color:var(--success);">✅ 正确做法：按时间切</h3>
+        <p style="font-size:0.9em;">前11个月训练，最后1个月测试。模拟真实场景：站在12月1日的早晨，用之前的所有数据训练，预测12月每一天的情况。</p>
+      </div>
+    </div>
+    <div class="stat-row" style="margin-top:16px;">
+      <div class="stat-badge"><div class="val">2023-01-01<br>~ 11-30</div><div class="lbl">训练集 (91.5%)</div></div>
+      <div class="stat-badge"><div class="val" style="color:var(--accent);">→</div><div class="lbl">时间顺序不可打乱</div></div>
+      <div class="stat-badge"><div class="val">2023-12-01<br>~ 12-31</div><div class="lbl">测试集 (8.5%)</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ 4. Random Forest ═══════ -->
+<div class="section">
+  <h2 class="section-title">四、模型 A：随机森林（Random Forest）</h2>
+
+  <div class="concept-box">
+    <h4>用生活例子理解随机森林</h4>
+    <p>你要猜一个陌生人的年龄。你问了100个人，每个人只看一部分信息：有人只看穿着、有人只看发型、有人只看说话方式。每个人独立给一个猜测。最后取<strong>所有人的平均值</strong>——这个结果通常比任何单个人的判断都准。</p>
+    <p style="margin-top:6px;">这就是随机森林：建 100 棵"决策树"，每棵树用不同的随机子集特征和数据来训练。每棵树独立预测，最后取平均。<strong>多样性 + 投票 = 不容易错。</strong></p>
+  </div>
+
+  <div class="card">
+    <h3>模型表现</h3>
+    <div class="stat-row">
+      <div class="stat-badge"><div class="val" style="color:var(--success);">16.2 件</div><div class="lbl">MAE (平均每次预测差 ±16件)</div></div>
+      <div class="stat-badge"><div class="val">22.4 件</div><div class="lbl">RMSE (惩罚大误差后)</div></div>
+      <div class="stat-badge"><div class="val" style="color:var(--primary);">0.661</div><div class="lbl">R² (0.66分/满分1)</div></div>
+      <div class="stat-badge"><div class="val">26.9%</div><div class="lbl">MAPE (平均偏27%)</div></div>
+    </div>
+    <div class="insight green">
+      <strong>怎么理解 R² = 0.66？</strong>如果把所有产品每天销量画成一条波动的曲线，R²=0.66 意味着模型解释了 66% 的波动规律，剩下 34% 是目前无法解释的随机因素。对于一个零售销量预测来说，0.66 是<strong>及格偏好的水平</strong>——不完美，但已经比"拿上个月均值当预测"（R²通常只有0.3-0.4）强很多了。
+    </div>
+  </div>
+
+  <!-- Feature Importance Chart -->
+  <div class="chart-wrapper">
+    <img src="prediction_charts/feature_importance.png" alt="特征重要性">
+    <p class="chart-caption">图 1：对预测销量最重要的 15 个特征（Random Forest）</p>
+  </div>
+
+  <div class="card">
+    <h3>什么在驱动销量？——特征重要性解读</h3>
+    <table>
+      <thead><tr><th>排名</th><th>特征</th><th>重要度</th><th>通俗解释</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td class="td-left best">sales_7d_mean</td><td class="best">54.3%</td><td class="td-left">最近一周平均每天卖多少——压倒性的最重要。销量有强惯性，昨天的热度通常会延续</td></tr>
+        <tr><td>2</td><td class="td-left">weekday</td><td>9.6%</td><td class="td-left">周几很重要——方案一已经发现工作日比周末高32%</td></tr>
+        <tr><td>3</td><td class="td-left">sales_7d_std</td><td>5.9%</td><td class="td-left">最近一周的波动幅度——波动大的产品预测更难</td></tr>
+        <tr><td>4</td><td class="td-left">weather_encoded</td><td>5.7%</td><td class="td-left">天气确实影响销量（方案一的统计检验已证实）</td></tr>
+        <tr><td>5</td><td class="td-left">promotion_type</td><td>3.5%</td><td class="td-left">做什么类型的促销——限时特价效果最强</td></tr>
+      </tbody>
+    </table>
+    <div class="insight blue">
+      <strong>核心发现：过去7天的销量均值占了超过一半的重要性。</strong>这意味着销量预测的本质不是"猜"，而是"看最近的趋势然后微调"。如果一款产品最近一周每天卖100件，那明天大概也在这个水平——除非有促销或节假日打破这个惯性。
+    </div>
+  </div>
+
+  <!-- Prediction vs Actual -->
+  <div class="chart-wrapper">
+    <img src="prediction_charts/prediction_vs_actual.png" alt="预测vs实际">
+    <p class="chart-caption">图 2：每个测试样本的预测值 vs 实际值。点越靠近对角线，预测越准</p>
+  </div>
+
+  <!-- Residual -->
+  <div class="chart-wrapper">
+    <img src="prediction_charts/residual_analysis.png" alt="残差分析">
+    <p class="chart-caption">图 3：左 — 预测误差的分布（以0为中心说明没有系统性偏差）；右 — 误差在不同预测值上的分布</p>
+  </div>
+  <div class="insight">
+    <strong>怎么看残差图？</strong>左图的钟形以0为中心——说明模型没有系统性高估或低估，误差随机分布在0两侧。右图的点云大致均匀——说明无论预测高销量还是低销量，误差程度差不多。如果右图出现"喇叭口"（高预测值的误差也变大），那说明模型对爆款预测不稳定。
+  </div>
+</div>
+
+<!-- ═══════ 5. ARIMA ═══════ -->
+<div class="section">
+  <h2 class="section-title">五、模型 B：ARIMA 时序模型</h2>
+
+  <div class="concept-box">
+    <h4>用生活例子理解 ARIMA</h4>
+    <p>你每天记录自己的体重。你知道三件事：① 你的"正常体重"是多少（<strong>均值回归</strong>）；② 如果昨天比前天重，今天大概率也比昨天重（<strong>趋势惯性</strong>）；③ 偶尔一顿大餐后体重飙升，但几天后会回到正常（<strong>随机扰动</strong>）。ARIMA 就是同时考虑这三个因素，只看历史序列本身做预测。<strong>跟 Random Forest 最大的区别是：ARIMA 不看促销、天气、价格这些外部信息，只盯着销量曲线本身的规律。</strong></p>
+  </div>
+
+  <div class="card">
+    <h3>ARIMA 表现（Top 5 产品各自建模）</h3>
+    <table>
+      <thead><tr><th>产品</th><th>MAE (件)</th><th>RMSE (件)</th><th>评价</th></tr></thead>
+      <tbody>
+        <tr><td class="td-left">收纳盒</td><td>70.6</td><td>86.4</td><td class="td-left">销量最大的产品，波动也最大</td></tr>
+        <tr><td class="td-left">文件夹</td><td>55.1</td><td>64.8</td></tr>
+        <tr><td class="td-left">便利贴</td><td>52.0</td><td>60.8</td></tr>
+        <tr><td class="td-left">笔</td><td class="best">45.8</td><td class="best">55.2</td><td class="td-left">相对最稳定</td></tr>
+        <tr><td class="td-left">笔记本</td><td>53.5</td><td>65.7</td></tr>
+      </tbody>
+    </table>
+    <div class="stat-row">
+      <div class="stat-badge"><div class="val" style="color:var(--danger);">55.4 件</div><div class="lbl">ARIMA 平均 MAE</div></div>
+      <div class="stat-badge"><div class="val" style="color:var(--success);">16.2 件</div><div class="lbl">Random Forest MAE</div></div>
+      <div class="stat-badge"><div class="val" style="color:var(--danger);">3.4×</div><div class="lbl">ARIMA 误差是 RF 的倍数</div></div>
+    </div>
+    <div class="insight">
+      <strong>ARIMA 为什么差这么多？</strong>不是 ARIMA 不行，是场景不对。ARIMA 只能看销量自己的历史规律，看不到"明天有促销""这周六是节假日""这款产品在打折"。而 MINISO 是一个<strong>高度促销驱动的零售场景</strong>（方案一已证明 86% 的销售跟促销绑定），抛开促销谈预测等于蒙眼走路。ARIMA 更适合<strong>没有明显外部干预的平稳序列</strong>（比如网站日均访问量、天气温度），不适合促销频繁的零售场景。
+    </div>
+  </div>
+
+  <div class="chart-wrapper">
+    <img src="prediction_charts/arima_detail.png" alt="ARIMA detail">
+    <p class="chart-caption">图 4：ARIMA 对 Top 3 产品在 12 月的预测效果。蓝色曲线是真实销量，橙色虚线是 ARIMA 预测</p>
+  </div>
+</div>
+
+<!-- ═══════ 6. Model Comparison ═══════ -->
+<div class="section">
+  <h2 class="section-title">六、模型 B：XGBoost</h2>
+
+  <div class="concept-box">
+    <h4>用生活例子理解 XGBoost vs Random Forest</h4>
+    <p><strong>Random Forest：</strong>请 100 个专家，每个人独立打分，最后取平均。专家之间不交流。</p>
+    <p style="margin-top:6px;"><strong>XGBoost：</strong>请 100 个专家排队。第 1 个专家打完分，第 2 个专家<strong>专门研究第 1 个专家打错的地方</strong>并修正；第 3 个修正第 2 个的残留错误……每一轮都在上一轮的残差上学习，越修越精准。</p>
+    <p style="margin-top:6px;">两种方法都是"群体决策优于个人"，但 XGBoost 是<strong>有组织的接力赛</strong>，Random Forest 是<strong>各自独立的投票</strong>。</p>
+  </div>
+
+  <div class="card">
+    <h3>XGBoost 表现</h3>
+    <div class="stat-row">
+      <div class="stat-badge"><div class="val" style="color:var(--success);">16.2 件</div><div class="lbl">MAE (平均误差 ±16件)</div></div>
+      <div class="stat-badge"><div class="val">22.6 件</div><div class="lbl">RMSE</div></div>
+      <div class="stat-badge"><div class="val" style="color:var(--primary);">0.656</div><div class="lbl">R²</div></div>
+      <div class="stat-badge"><div class="val">26.8%</div><div class="lbl">MAPE</div></div>
+    </div>
+
+    <h3 style="margin-top:20px;">XGBoost 特征重要性 — 跟 Random Forest 有什么不同？</h3>
+    <table>
+      <thead><tr><th>排名</th><th>特征</th><th>重要度</th><th>与 RF 的差异</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td class="td-left best">sales_7d_mean</td><td class="best">37.8%</td><td class="td-left">还是第一，但比 RF 的 54.3% 分散了很多</td></tr>
+        <tr><td>2</td><td class="td-left">weekday</td><td>11.6%</td><td class="td-left">≈ RF (9.6%)，共识</td></tr>
+        <tr><td>3</td><td class="td-left">weather_encoded</td><td>10.6%</td><td class="td-left">比 RF (5.7%) 权重大得多</td></tr>
+        <tr><td>4</td><td class="td-left">is_holiday</td><td>10.4%</td><td class="td-left">比 RF (2.1%) 权重大 5 倍——XGBoost 更重视节假日</td></tr>
+        <tr><td>5</td><td class="td-left">promotion_type</td><td>6.8%</td><td class="td-left">≈ RF 的两倍</td></tr>
+      </tbody>
+    </table>
+    <div class="insight blue">
+      <strong>XGBoost 与 Random Forest 的核心差异：</strong>RF 把超过一半的权重给了"最近7天销量均值"这一个特征，其他特征几乎都是配角。XGBoost 更"民主"——虽然 sales_7d_mean 还是第一，但权重只有 37.8%，节假日、天气、促销类型这些外部因素各自拿到了 6-12% 的话语权。<strong>这意味着 XGBoost 更擅长捕捉"特殊日子"的销量异动</strong>（节假日、暴雪天、大促），而 RF 更偏重"一般情况"的趋势追踪。
+    </div>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">七、三模型对比与 12 月趋势追踪</h2>
+
+    <div class="chart-wrapper">
+      <img src="prediction_charts/model_comparison.png" alt="模型对比">
+      <p class="chart-caption">图 5：三模型 MAE 和 RMSE 对比（越低越好）</p>
+    </div>
+
+    <div class="chart-wrapper">
+      <img src="prediction_charts/30day_trend.png" alt="30天趋势">
+      <p class="chart-caption">图 6：12 月每一天的总销量（所有产品加总），实际 vs RF vs XGBoost 预测</p>
+    </div>
+
+    <div class="card">
+      <h3>三模型综合对比</h3>
+      <table>
+        <thead><tr><th>对比维度</th><th>Random Forest</th><th>XGBoost</th><th>ARIMA</th></tr></thead>
+        <tbody>
+          <tr><td class="td-left">误差 (MAE)</td><td class="best">16.2 件</td><td class="best">16.2 件</td><td>55.4 件</td></tr>
+          <tr><td class="td-left">拟合度 (R²)</td><td class="best">0.661</td><td>0.656</td><td>—</td></tr>
+          <tr><td class="td-left">MAPE</td><td>26.9%</td><td>26.8%</td><td>—</td></tr>
+          <tr><td class="td-left">节假日识别力</td><td>弱 (权重2.1%)</td><td class="best">强 (权重10.4%)</td><td>无</td></tr>
+          <tr><td class="td-left">训练速度</td><td>快</td><td>快</td><td class="best">—</td></tr>
+          <tr><td class="td-left">可解释性</td><td>特征重要性</td><td>特征重要性</td><td>只看自身趋势</td></tr>
+        </tbody>
+      </table>
+      <div class="insight green">
+        <strong>最终结论：</strong>RF 和 XGBoost 在整体指标上几乎打平（MAE 相同，R² 差 0.005），但 XGBoost 的特征权重分配更合理——把节假日、天气、促销的重要性提到了应有位置。在实际应用中，<strong>两者都可选</strong>。如果业务更看重"一般日子"的稳定预测，用 RF；如果更看重"节假日/大促"这种特殊日子的精准度，用 XGBoost。ARIMA 不适合此类促销驱动的零售场景——误差是树模型的 3.4 倍。
+      </div>
+    </div>
+  </div>
+
+<!-- ═══════ 7. 业务应用 ═══════ -->
+<div class="section">
+  <h2 class="section-title">七、这个模型能用来做什么？</h2>
+  <div class="grid-2">
+    <div class="card">
+      <h3>1. 每日备货量推荐</h3>
+      <p style="font-size:0.9em;">每天早上跑一次模型，输入"今天星期几、天气预报、有没有促销"，输出每款产品预计卖多少件。备货量 = 预测值 + 安全库存（比如预测×1.2）。平均误差 ±16 件对大多数产品来说是可接受的。</p>
+    </div>
+    <div class="card">
+      <h3>2. 促销排期优化</h3>
+      <p style="font-size:0.9em;">模型告诉我们"限时特价能让预测值翻倍"。在做促销排期时，可以先用模型模拟"如果这周做限时特价vs如果不做"，看哪种方案带来的总预测销量最高。</p>
+    </div>
+    <div class="card">
+      <h3>3. 异常检测</h3>
+      <p style="font-size:0.9em;">如果某天实际销量比模型预测值低很多（比如预测 120 件实际只卖了 40 件），系统可以自动告警——可能是缺货、陈列异常或者竞品做活动了。从"事后看报表"变成"实时发现问题"。</p>
+    </div>
+    <div class="card">
+      <h3>4. 改进方向</h3>
+      <p style="font-size:0.9em;">① 加入更多特征：竞品活动、社交媒体热度、天气具体数值（非分类）；② 试更复杂的模型：LightGBM、深度学习(LSTM)；③ 分产品建模：每个产品单独训练一个模型，可能比全局模型更准。</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ 8. 初学者指南 ═══════ -->
+<div class="section">
+  <h2 class="section-title">八、初学者学习路径</h2>
+  <div class="card">
+    <h3>如果让我从零开始做预测模型，按这个顺序学：</h3>
+    <ol style="padding-left:20px;font-size:0.92em;">
+      <li style="margin-bottom:8px;"><strong>理解数据泄露</strong>——这是第一课，也是最容易被忽略的。每次建模前问自己：这些特征在预测时真的能拿到吗？</li>
+      <li style="margin-bottom:8px;"><strong>跑通一个最简单的模型</strong>——用 Random Forest + 5 个特征，R² 能做到 0.5 以上就算成功。不要在第一步就追求完美。</li>
+      <li style="margin-bottom:8px;"><strong>看懂特征重要性</strong>——模型告诉你哪个特征重要，你去理解为什么它重要。这是从"调包侠"变成"分析师"的关键一步。</li>
+      <li style="margin-bottom:8px;"><strong>加特征，看效果</strong>——每次加一个新特征，看 R² 有没有提升。提了说明这个特征有用，没提说明它可能是噪声。</li>
+      <li style="margin-bottom:8px;"><strong>对比不同模型</strong>——用同样的训练/测试数据跑 2-3 个模型，比较 MAE/RMSE/R²。不要只看 R²，MAE 更直观（平均差几件）。</li>
+      <li style="margin-bottom:8px;"><strong>学 XGBoost</strong>——在 Random Forest 跑通之后再学 XGBoost。各种比赛的前十名方案几乎都用它。核心参数就三个：n_estimators（几轮）、max_depth（每棵树多深）、learning_rate（每步学多少）。</li>
+      <li style="margin-bottom:8px;"><strong>最后学时序模型 (ARIMA/Prophet)</strong>——如果数据没有促销、价格这些特征（比如预测网站流量、天气温度），ARIMA 反而是好选择。</li>
+    </ol>
+  </div>
+</div>
+
+<div class="footer">
+  <p>方案二：销量预测模型 | Random Forest + ARIMA | 2023 MINISO 全年数据 9,125 条</p>
+  <p style="margin-top:6px;">代码：<code>prediction_model.py</code> &nbsp;|&nbsp; 图表：<code>prediction_charts/</code> &nbsp;|&nbsp; 生成日期：2026-05-15</p>
+</div>
+
+</div>
+</body>
+</html>

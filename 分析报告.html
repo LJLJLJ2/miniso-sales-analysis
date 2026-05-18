@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MINISO 2023 销售数据分析与促销效果评估</title>
+<style>
+  :root {
+    --primary: #1b4b5e;
+    --accent: #e8733a;
+    --blue: #4ca6ba;
+    --gold: #c39858;
+    --purple: #8e6c8a;
+    --bg: #f8f9fa;
+    --card: #ffffff;
+    --text: #2c3e50;
+    --text-light: #5a6c7d;
+    --border: #e2e8f0;
+    --success: #27ae60;
+    --warning: #f39c12;
+    --danger: #e74c3c;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "PingFang SC", "Heiti TC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.7;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    background: linear-gradient(135deg, #1b4b5e 0%, #0d3140 50%, #1a3a4a 100%);
+    color: #fff; padding: 60px 10% 50px; text-align: center; position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+    background: radial-gradient(ellipse at 30% 50%, rgba(232,115,58,0.12) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 30%, rgba(76,166,186,0.1) 0%, transparent 50%);
+  }
+  .hero h1 { font-size: 2.4em; font-weight: 800; letter-spacing: 2px; position: relative; margin-bottom: 8px; }
+  .hero .subtitle { font-size: 1.1em; color: rgba(255,255,255,0.7); position: relative; margin-bottom: 35px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; max-width: 1000px; margin: 0 auto; position: relative; }
+  .kpi-card {
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 12px; padding: 22px 16px; backdrop-filter: blur(10px);
+  }
+  .kpi-card .kpi-value { font-size: 1.8em; font-weight: 800; color: #fff; }
+  .kpi-card .kpi-label { font-size: 0.85em; color: rgba(255,255,255,0.6); margin-top: 4px; }
+  .kpi-card .kpi-highlight { color: #e8733a; }
+
+  /* ── Layout ── */
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 5%; }
+
+  /* ── Section ── */
+  .section { margin: 50px 0; }
+  .section-title {
+    font-size: 1.6em; font-weight: 700; color: var(--primary); padding-bottom: 12px;
+    border-bottom: 3px solid var(--accent); display: inline-block; margin-bottom: 30px;
+  }
+  .section-subtitle { font-size: 1.2em; font-weight: 600; color: var(--text); margin: 30px 0 16px; }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--card); border-radius: 12px; padding: 28px 32px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+    margin-bottom: 24px;
+  }
+  .card h3 { font-size: 1.15em; color: var(--primary); margin-bottom: 16px; }
+
+  /* ── Chart ── */
+  .chart-wrapper { text-align: center; margin: 24px 0; }
+  .chart-wrapper img { max-width: 100%; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+  .chart-caption { font-size: 0.85em; color: var(--text-light); margin-top: 8px; }
+
+  /* ── Tables ── */
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.92em; }
+  thead th {
+    background: var(--primary); color: #fff; padding: 10px 14px; text-align: center;
+    font-weight: 600; font-size: 0.88em;
+  }
+  thead th:first-child { border-radius: 6px 0 0 0; }
+  thead th:last-child { border-radius: 0 6px 0 0; }
+  tbody td { padding: 9px 14px; text-align: center; border-bottom: 1px solid var(--border); }
+  tbody tr:hover { background: #f0f5f7; }
+  tbody tr:last-child td:first-child { border-radius: 0 0 0 6px; }
+  tbody tr:last-child td:last-child { border-radius: 0 0 6px 0; }
+  .td-left { text-align: left !important; }
+  .td-right { text-align: right !important; }
+  .highlight-cell { background: #fff7ed; font-weight: 600; }
+  .best { color: var(--success); font-weight: 700; }
+  .worst { color: var(--danger); font-weight: 600; }
+
+  /* ── Insight Box ── */
+  .insight {
+    background: linear-gradient(135deg, #f0f7f9, #faf5f0); border-left: 4px solid var(--accent);
+    padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 20px 0;
+  }
+  .insight strong { color: var(--accent); }
+  .insight.blue { border-left-color: var(--blue); background: linear-gradient(135deg, #f0f7f9, #f5fafb); }
+  .insight.blue strong { color: var(--blue); }
+  .insight.green { border-left-color: var(--success); background: linear-gradient(135deg, #f0faf4, #f5faf7); }
+  .insight.green strong { color: var(--success); }
+
+  /* ── Two-column ── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  @media (max-width: 768px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+  /* ── Stat Badge ── */
+  .stat-row { display: flex; gap: 16px; flex-wrap: wrap; margin: 16px 0; }
+  .stat-badge {
+    background: #f0f4f7; border-radius: 8px; padding: 12px 18px; text-align: center;
+    flex: 1; min-width: 120px;
+  }
+  .stat-badge .val { font-size: 1.3em; font-weight: 700; color: var(--primary); }
+  .stat-badge .lbl { font-size: 0.78em; color: var(--text-light); margin-top: 2px; }
+
+  /* ── Feature list ── */
+  .feature-list { list-style: none; padding: 0; }
+  .feature-list li { padding: 8px 0 8px 24px; position: relative; }
+  .feature-list li::before {
+    content: '▸'; position: absolute; left: 0; color: var(--accent); font-weight: 700;
+  }
+
+  /* ── Conclusion ── */
+  .conclusion-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin: 20px 0; }
+  @media (max-width: 768px) { .conclusion-grid { grid-template-columns: 1fr; } }
+  .conclusion-item {
+    background: var(--card); border-radius: 10px; padding: 20px 22px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05); border-top: 3px solid var(--accent);
+  }
+  .conclusion-item h4 { font-size: 1em; color: var(--primary); margin-bottom: 8px; }
+
+  /* ── Footer ── */
+  .footer {
+    text-align: center; padding: 40px 5%; color: var(--text-light); font-size: 0.85em;
+    border-top: 1px solid var(--border); margin-top: 60px;
+  }
+
+  /* ── TOC ── */
+  .toc { background: var(--card); border-radius: 12px; padding: 24px 32px; margin: 30px 0; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+  .toc h3 { font-size: 1.1em; margin-bottom: 12px; color: var(--primary); }
+  .toc ol { columns: 2; padding-left: 20px; }
+  .toc li { margin-bottom: 6px; color: var(--text-light); font-size: 0.9em; }
+  .toc li a { color: var(--text); text-decoration: none; }
+  .toc li a:hover { color: var(--accent); }
+  @media (max-width: 600px) { .toc ol { columns: 1; } }
+
+  /* ── Methodology badge ── */
+  .badge {
+    display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 0.78em;
+    font-weight: 600; margin: 0 2px;
+  }
+  .badge.sql { background: #e8f4f8; color: #1b4b5e; }
+  .badge.scipy { background: #fef3e2; color: #e8733a; }
+  .badge.seaborn { background: #e8f0f4; color: #4ca6ba; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<div class="hero">
+  <h1>MINISO 2023 年销售数据分析</h1>
+  <p class="subtitle">促销效果评估 · 品类结构拆解 · 季节性规律 · 统计检验验证</p>
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-value">¥1.07<span style="font-size:0.55em">亿</span></div>
+      <div class="kpi-label">全年总营收</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-value">90.6<span style="font-size:0.55em">万</span></div>
+      <div class="kpi-label">全年总销量（件）</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-value">9,125</div>
+      <div class="kpi-label">数据行数（日×SKU）</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-value">5 <span style="font-size:0.5em">品类</span> · 24 <span style="font-size:0.5em">产品</span></div>
+      <div class="kpi-label">覆盖范围</div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ═══════════════ 目录 ═══════════════ -->
+<div class="toc">
+  <h3>报告目录</h3>
+  <ol>
+    <li><a href="#s2">销售趋势：每日走势与月度分布</a></li>
+    <li><a href="#s3">品类结构：五大品类的营收贡献与客单价</a></li>
+    <li><a href="#s4">产品排名：Top 10 爆款与尾部产品</a></li>
+    <li><a href="#s5">促销效果：四种促销方式的销量提升对比（核心）</a></li>
+    <li><a href="#s6">季节性：季节 × 星期 × 品类月份热力图</a></li>
+    <li><a href="#s7">外部因素：天气与节假日对销量的影响</a></li>
+    <li><a href="#s8">价格与周转：价格档位结构与库存效率</a></li>
+    <li><a href="#s9">统计检验：t检验 + ANOVA + 相关性分析</a></li>
+    <li><a href="#s10">业务建议与行动清单</a></li>
+  </ol>
+</div>
+
+<!-- ═══════════════ 1. 分析工具 ═══════════════ -->
+<div class="section">
+  <p style="color: var(--text-light); font-size: 0.9em;">
+    分析工具：
+    <span class="badge sql">SQL (SQLite)</span> 多维聚合查询 ·
+    <span class="badge scipy">SciPy</span> 统计显著性检验 ·
+    <span class="badge seaborn">Seaborn + Matplotlib</span> 可视化（共 13 张图表）
+  </p>
+</div>
+
+<!-- ═══════════════ 2. 销售趋势 ═══════════════ -->
+<div class="section" id="s2">
+  <h2 class="section-title">一、销售趋势分析</h2>
+
+  <div class="chart-wrapper">
+    <img src="charts/01_daily_trend.png" alt="每日销售趋势">
+    <p class="chart-caption">图 1：每日总营收（浅色面积）与 7 日滑动平均（深色曲线）—— 左轴营收，右轴销量</p>
+  </div>
+
+  <div class="card">
+    <h3>月度量价表</h3>
+    <table>
+      <thead><tr><th>月份</th><th>营收（万元）</th><th>总销量（件）</th><th>日均销量/件</th><th>均价（¥）</th></tr></thead>
+      <tbody>
+        <tr><td>1月</td><td>682</td><td>58,186</td><td>75.1</td><td>117.4</td></tr>
+        <tr><td>2月</td><td class="worst">644</td><td class="worst">55,623</td><td>79.5</td><td>113.7</td></tr>
+        <tr><td>3月</td><td>899</td><td>74,726</td><td>96.4</td><td>118.2</td></tr>
+        <tr><td>4月</td><td>881</td><td>72,573</td><td>96.8</td><td>120.1</td></tr>
+        <tr><td>5月</td><td>935</td><td>79,323</td><td>102.4</td><td>119.4</td></tr>
+        <tr><td>6月</td><td>1,007</td><td>86,351</td><td>115.1</td><td>115.5</td></tr>
+        <tr><td>7月</td><td>1,040</td><td>87,127</td><td>112.4</td><td>118.1</td></tr>
+        <tr><td class="best">8月</td><td class="best">1,066</td><td class="best">91,095</td><td class="best">117.5</td><td>115.8</td></tr>
+        <tr><td>9月</td><td>941</td><td>79,031</td><td>105.4</td><td>118.4</td></tr>
+        <tr><td>10月</td><td>1,021</td><td>84,599</td><td>109.2</td><td>122.6</td></tr>
+        <tr><td>11月</td><td>940</td><td>80,092</td><td>106.8</td><td>118.3</td></tr>
+        <tr><td>12月</td><td>662</td><td>56,804</td><td>73.3</td><td>116.4</td></tr>
+      </tbody>
+    </table>
+    <div class="insight">
+      <strong>关键发现：</strong>8月是全年最高峰（¥1,066万），2月是全年低谷（¥644万），峰谷相差 <strong>65.6%</strong>。下半年（7-12月）贡献全年营收的 <strong>52.9%</strong>，略高于上半年。
+      12月营收骤降至 ¥662万，日均仅 73.3 件，是全年的"断崖式"回落——这可能与圣诞/年末消费结构转向其他渠道有关，但也需排除数据在12月是否提前截断（数据截止 12月31日，最后几日记录正常）。
+    </div>
+  </div>
+
+  <div class="chart-wrapper">
+    <img src="charts/02_monthly.png" alt="月度营收与销量">
+    <p class="chart-caption">图 2：月度营收（柱状，左轴）与销量（折线，右轴）</p>
+  </div>
+
+  <div class="insight blue">
+    <strong>趋势解读：</strong>从日度折线图（图 1）可以看出，全年营收并非平稳增长，而是呈现密集的<strong>脉冲式波动</strong>——某些日期营收突增至 ¥60-70万，然后又迅速回落。这种"尖峰"模式是<strong>促销驱动型零售</strong>的典型特征：销量的爆发往往不是随机出现的，而是限时特价、满减、买赠等活动触发的结果。每个月都有若干次峰值，说明促销活动频次很高，几乎贯穿全年。
+  </div>
+</div>
+
+<!-- ═══════════════ 3. 品类与产品 ═══════════════ -->
+<div class="section" id="s3">
+  <h2 class="section-title">二、品类结构分析</h2>
+
+  <div class="chart-wrapper">
+    <img src="charts/03_category.png" alt="品类营收">
+    <p class="chart-caption">图 3：五大品类营收对比</p>
+  </div>
+
+  <div class="card">
+    <h3>品类营收明细</h3>
+    <table>
+      <thead><tr><th>品类</th><th>营收（万元）</th><th>营收占比</th><th>总销量（件）</th><th>平均售价（¥）</th><th>平均周转率</th></tr></thead>
+      <tbody>
+        <tr><td class="td-left best">文具办公</td><td>3,216</td><td class="best">30.0%</td><td>274,945</td><td>117.0</td><td class="best">64.0%</td></tr>
+        <tr><td class="td-left">生活用品</td><td>2,747</td><td>25.6%</td><td>224,269</td><td class="best">122.5</td><td>62.0%</td></tr>
+        <tr><td class="td-left">美妆护肤</td><td>2,102</td><td>19.6%</td><td>180,746</td><td>116.3</td><td>58.8%</td></tr>
+        <tr><td class="td-left">数码配件</td><td>1,588</td><td>14.8%</td><td>135,270</td><td>117.4</td><td>52.4%</td></tr>
+        <tr><td class="td-left">玩具礼品</td><td class="worst">1,066</td><td class="worst">9.9%</td><td class="worst">90,300</td><td>118.0</td><td class="worst">41.2%</td></tr>
+      </tbody>
+    </table>
+
+    <div class="grid-2" style="margin-top:20px;">
+      <div class="insight">
+        <strong>前三大品类（文具办公 + 生活用品 + 美妆护肤）合计占比 75.2%</strong>，构成了营收的基本盘。其中文具办公单独占了近三分之一，是这个门店绝对的核心品类。
+      </div>
+      <div class="insight blue">
+        <strong>各品类均价差异很小</strong>（全部在 ¥116-123 之间），说明品类之间的营收差异不是来自定价策略，而是来自<strong>销量规模</strong>——文具办公就是单纯卖得多（27.5万件），比玩具礼品多出 3 倍。
+      </div>
+    </div>
+  </div>
+
+  <!-- 品类×月份热力图 -->
+  <div class="section-subtitle">品类 × 月份：营收热力图</div>
+  <div class="chart-wrapper">
+    <img src="charts/09_heatmap_category_month.png" alt="品类月份热力图">
+    <p class="chart-caption">图 4：品类 × 月份营收热力图（颜色越深 = 营收越高，单位 ¥万）</p>
+  </div>
+  <div class="insight green">
+    <strong>热力图看点：</strong>8月是文具办公（¥329万）和生活用品（¥280万）的共同高点；6月是数码配件（¥157万）和美妆护肤（¥214万）的最好月份。如果你想针对特定品类做促销，<strong>把该品类的促销安排在它历史上的最佳月份</strong>，效果会比随机投放更强。
+  </div>
+</div>
+
+<!-- ═══════════════ 4. 产品排名 ═══════════════ -->
+<div class="section" id="s4">
+  <h2 class="section-title">三、产品排名分析</h2>
+
+  <div class="chart-wrapper">
+    <img src="charts/04_products.png" alt="Top 10 产品">
+    <p class="chart-caption">图 5：营收 Top 10 产品</p>
+  </div>
+
+  <div class="card">
+    <h3>营收 Top 10 产品</h3>
+    <table>
+      <thead><tr><th>排名</th><th>产品</th><th>营收（万元）</th><th>销量（件）</th><th>均价（¥）</th><th>所属品类</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td class="td-left">收纳盒</td><td class="best">1,101</td><td>96,100</td><td>114.6</td><td class="td-left">生活用品</td></tr>
+        <tr><td>2</td><td class="td-left">文件夹</td><td>708</td><td>56,700</td><td>124.8</td><td class="td-left">文具办公</td></tr>
+        <tr><td>3</td><td class="td-left">笔记本</td><td>653</td><td>54,305</td><td>120.2</td><td class="td-left">文具办公</td></tr>
+        <tr><td>4</td><td class="td-left">便利贴</td><td>648</td><td>56,465</td><td>114.8</td><td class="td-left">文具办公</td></tr>
+        <tr><td>5</td><td class="td-left">笔</td><td>640</td><td>55,622</td><td>115.1</td><td class="td-left">文具办公</td></tr>
+        <tr><td>6</td><td class="td-left">清洁用品</td><td>588</td><td>47,087</td><td>124.9</td><td class="td-left">生活用品</td></tr>
+        <tr><td>7</td><td class="td-left">餐具</td><td>577</td><td>44,018</td><td>131.1</td><td class="td-left">生活用品</td></tr>
+        <tr><td>8</td><td class="td-left">水杯</td><td>545</td><td>45,668</td><td>119.3</td><td class="td-left">生活用品</td></tr>
+        <tr><td>9</td><td class="td-left">浴室用品</td><td>502</td><td>43,249</td><td>116.1</td><td class="td-left">生活用品</td></tr>
+        <tr><td>10</td><td class="td-left">化妆棉</td><td>438</td><td>36,278</td><td>120.7</td><td class="td-left">美妆护肤</td></tr>
+      </tbody>
+    </table>
+
+    <div class="stat-row">
+      <div class="stat-badge"><div class="val">59.7%</div><div class="lbl">Top 10 营收占比</div></div>
+      <div class="stat-badge"><div class="val">¥1,101万</div><div class="lbl">Top 1（收纳盒）营收</div></div>
+      <div class="stat-badge"><div class="val">¥207万</div><div class="lbl">末尾产品（益智玩具）营收</div></div>
+      <div class="stat-badge"><div class="val">5.3×</div><div class="lbl">首尾营收倍数</div></div>
+    </div>
+
+    <div class="insight">
+      <strong>头部集中效应：</strong>Top 10 产品贡献了 59.7% 的总营收，接近六成。Top 1 收纳盒一家独大（¥1,101万），比第 2 名高出 55%。在 5 个品类中，<strong>文具办公在 Top 10 中占 4 席</strong>，生活用品占 4 席，美妆护肤占 1 席。数码配件和玩具礼品没有一个产品进入 Top 10——这与它们品类整体规模较小一致。
+    </div>
+  </div>
+
+  <div class="chart-wrapper">
+    <img src="charts/11_barplot_category_price.png" alt="品类×价格档位">
+    <p class="chart-caption">图 6：各品类在不同价格档位下的平均日销量</p>
+  </div>
+  <div class="insight blue">
+    <strong>价格档位影响因品类而异：</strong>从图 6 可以看出，文具办公在三个价格档位的销量都高于其他品类，说明它的优势是全价格带覆盖的。数码配件在高价位的表现相对更好——这符合其"高客单低频"的品类属性。
+  </div>
+</div>
+
+<!-- ═══════════════ 5. 促销效果评估 ═══════════════ -->
+<div class="section" id="s5">
+  <h2 class="section-title">四、促销效果评估（核心章节）</h2>
+
+  <div class="chart-wrapper">
+    <img src="charts/05_promotion.png" alt="促销类型对比">
+    <p class="chart-caption">图 7：四种促销方式与无促销的日均销量对比</p>
+  </div>
+
+  <div class="card">
+    <h3>促销类型详细对比</h3>
+    <table>
+      <thead><tr><th>促销类型</th><th>数据条数</th><th>日均销量/件</th><th>相比无促销提升</th><th>总营收（万元）</th><th>营收占比</th></tr></thead>
+      <tbody>
+        <tr><td class="td-left">无促销（基准）</td><td>1,837</td><td>67.7</td><td>—</td><td>1,480</td><td>13.8%</td></tr>
+        <tr><td class="td-left best">限时特价</td><td>1,833</td><td class="best">118.1</td><td class="best">+74.4%</td><td class="best">2,598</td><td class="best">24.2%</td></tr>
+        <tr><td class="td-left">买赠</td><td>1,877</td><td>107.2</td><td>+58.3%</td><td>2,399</td><td>22.4%</td></tr>
+        <tr><td class="td-left">打折</td><td>1,813</td><td>103.3</td><td>+52.6%</td><td>2,161</td><td>20.2%</td></tr>
+        <tr><td class="td-left">满减</td><td>1,765</td><td>99.7</td><td>+47.2%</td><td>2,080</td><td>19.4%</td></tr>
+      </tbody>
+    </table>
+
+    <div class="grid-2" style="margin-top:20px;">
+      <div class="insight">
+        <strong>限时特价是效果最强的促销方式。</strong>日均 118.1 件的销量比无促销高出 74.4%，而且以 24.2% 的营收占比成为第一大促销贡献来源。这说明"明确底价+制造紧迫感"的组合是最有效的。
+      </div>
+      <div class="insight">
+        <strong>满减效果最弱。</strong>比无促销仅提升 47.2%，是四种促销中最低的。可能原因是满减门槛过滤了一部分小额冲动消费——MINISO 的客单价本身不高（均价约 ¥117），设置门槛可能适得其反。
+      </div>
+      <div class="insight green">
+        <strong>品牌高度依赖促销。</strong>仅 13.8% 的营收在无促销状态下产生。这意味着超过 86% 的销售都与某种促销活动绑定——这不是"促销辅助日常销售"，而是"促销就是日常销售模式"。
+      </div>
+      <div class="insight blue">
+        <strong>买赠 vs 打折：效果接近，但买赠对利润更友好。</strong>买赠（+58.3%）和打折（+52.6%）的提升幅度差距不大（5.7 个百分点），但买赠可以在不直接降低标价的情况下维持客单价和品牌形象，长远看对利润率保护更好。
+      </div>
+    </div>
+  </div>
+
+  <!-- Boxplot -->
+  <div class="section-subtitle">促销销量分布：稳定性分析</div>
+  <div class="chart-wrapper">
+    <img src="charts/10_boxplot_promotion.png" alt="促销箱线图">
+    <p class="chart-caption">图 8：各促销类型的销量分布箱线图（μ = 均值，箱体 = 四分位距 IQR）</p>
+  </div>
+  <div class="insight">
+    <strong>怎样读懂箱线图：</strong>中间的横线是中位数（一半天数销量在此之上），箱体上下沿分别是 25% 和 75% 分位数。箱体越短说明效果越稳定，箱体越长说明波动越大。从图 8 可以看出：<strong>限时特价不仅均值最高，而且箱体位置整体上移</strong>——不是靠几个极端值拉高的假象。无促销（灰色）的箱体明显低于所有促销类型，两者的分布几乎不重叠，这解释了为什么统计检验中促销 vs 无促销的差异是"极显著"的。
+  </div>
+
+  <!-- Price × Promo cross -->
+  <div class="section-subtitle">价格档位 × 促销类型：交叉分析</div>
+  <table>
+    <thead><tr><th>价格档位</th><th>最佳促销</th><th>日均销量</th><th>次佳促销</th><th>日均销量</th></tr></thead>
+    <tbody>
+      <tr><td class="td-left">低价</td><td class="td-left">限时特价</td><td class="best">112.5</td><td class="td-left">买赠</td><td>107.3</td></tr>
+      <tr><td class="td-left">中价</td><td class="td-left">限时特价</td><td class="best">120.1</td><td class="td-left">买赠</td><td>107.9</td></tr>
+      <tr><td class="td-left">高价</td><td class="td-left">限时特价</td><td class="best">121.7</td><td class="td-left">买赠</td><td>106.4</td></tr>
+    </tbody>
+  </table>
+  <div class="insight blue" style="margin-top:16px;">
+    <strong>无论哪个价格档位，限时特价都是第一名，买赠都是第二名。</strong>这个结论非常稳健——不存在"低价产品适合打折、高价产品适合满减"的反转。换句话说，促销策略的选择不需要过于纠结品类或价格档位的差异，<strong>限时特价就是普适最优解</strong>。
+  </div>
+</div>
+
+<!-- ═══════════════ 6. 季节性 ═══════════════ -->
+<div class="section" id="s6">
+  <h2 class="section-title">五、季节性规律</h2>
+
+  <div class="chart-wrapper">
+    <img src="charts/06_seasonality.png" alt="季节与星期分布">
+    <p class="chart-caption">图 9：左 — 各季节营收；右 — 星期分布日均销量</p>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h3>季节营收分布</h3>
+      <table>
+        <thead><tr><th>季节</th><th>营收（万元）</th><th>占比</th></tr></thead>
+        <tbody>
+          <tr><td>春季</td><td>2,714</td><td>25.3%</td></tr>
+          <tr><td class="best">夏季</td><td class="best">3,114</td><td class="best">29.1%</td></tr>
+          <tr><td>秋季</td><td>2,902</td><td>27.1%</td></tr>
+          <tr><td class="worst">冬季</td><td class="worst">1,988</td><td class="worst">18.5%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h3>星期分布（日均销量/件）</h3>
+      <table>
+        <thead><tr><th>时段</th><th>日均销量</th></tr></thead>
+        <tbody>
+          <tr><td class="best">工作日（周一~周五）</td><td class="best">109.4</td></tr>
+          <tr><td class="worst">周末（周六、周日）</td><td class="worst">74.1</td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:12px; font-size:0.9em; color: var(--text-light);">周末比工作日低 <strong style="color: var(--danger);">32.2%</strong></div>
+    </div>
+  </div>
+
+  <div class="insight">
+    <strong>周末低于工作日：一个反直觉但合理的发现。</strong>大多数零售业态是周末销售更好，但 MINISO 的门店大量分布在<strong>交通枢纽和通勤型商圈</strong>（地铁站、写字楼周边），这类位置在工作日有稳定的通勤人流，消费者会在上下班途中顺手购买。周末人流转向大型购物中心或线上渠道，MINISO 的快消杂货定位反而失去了场景优势。
+  </div>
+
+  <div class="chart-wrapper">
+    <img src="charts/13_violin_season.png" alt="季节小提琴图">
+    <p class="chart-caption">图 10：各季节销量分布的小提琴图（宽度 = 该销量区间的出现频次）</p>
+  </div>
+  <div class="insight blue">
+    <strong>怎样读懂小提琴图：</strong>图形越"胖"的地方，说明该销量水平出现的天数越多。夏季的小提琴图中部较宽，说明大部分天数的销量集中在较高水平；冬季的中位数较低，但分布形状也比较均匀——冬天不是没有好日子，而是好日子整体偏少。
+  </div>
+</div>
+
+<!-- ═══════════════ 7. 天气与节假日 ═══════════════ -->
+<div class="section" id="s7">
+  <h2 class="section-title">六、天气与节假日影响</h2>
+
+  <div class="chart-wrapper">
+    <img src="charts/07_weather_holiday.png" alt="天气与节假日">
+    <p class="chart-caption">图 11：左 — 天气对日均销量的影响；右 — 节假日 vs 非节假日</p>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h3>天气影响</h3>
+      <table>
+        <thead><tr><th>天气</th><th>日均销量</th><th>数据条数</th></tr></thead>
+        <tbody>
+          <tr><td class="best">多云</td><td class="best">112.7</td><td>2,475</td></tr>
+          <tr><td>晴天</td><td>111.5</td><td>2,150</td></tr>
+          <tr><td>雨天</td><td>98.6</td><td>2,150</td></tr>
+          <tr><td class="worst">雪天</td><td class="worst">74.5</td><td>2,350</td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:8px; font-size:0.85em; color:var(--text-light);">多云 vs 雪天极差：51.3%</div>
+    </div>
+    <div class="card">
+      <h3>节假日效应</h3>
+      <table>
+        <thead><tr><th>类型</th><th>日均销量</th><th>数据条数</th></tr></thead>
+        <tbody>
+          <tr><td class="best">节假日</td><td class="best">150.3</td><td>325 (3.6%)</td></tr>
+          <tr><td>非节假日</td><td>97.4</td><td>8,800 (96.4%)</td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:8px; font-size:0.85em; color:var(--text-light);">节假日相对提升：<strong style="color:var(--success);">+54.4%</strong></div>
+    </div>
+  </div>
+
+  <div class="insight">
+    <strong>天气影响存在，但需谨慎解读。</strong>多云和晴天（日均 112、111 件）几乎没有差别，雨天降至 98.6 件，雪天骤降至 74.5 件。但这里存在一个<strong>混淆因素</strong>：雪天通常集中在冬季（本身就是淡季），且雪天可能伴随交通不便、门店营业时间缩短等情况。不能简单地说"下雪导致销量下降"，更准确的说法是：<strong>雪天条件下的销量显著低于其他天气，但可能混杂了季节效应和非天气因素</strong>。
+  </div>
+  <div class="insight green">
+    <strong>节假日是单一最强外部驱动力。</strong>节假日日均销量高达 150.3 件，比非节假日高 54.4%。但需注意节假日记录仅占 3.6%（325条），且节假日往往叠加了额外的促销活动。建议的解读口径：<strong>"节假日 + 促销"的组合拳能产生远超平时的销售峰值</strong>，节假日本身是"放大器"，提前 2 周做好爆品备货和促销排期就能最大化这一窗口。
+  </div>
+</div>
+
+<!-- ═══════════════ 8. 价格与周转 ═══════════════ -->
+<div class="section" id="s8">
+  <h2 class="section-title">七、价格档位与库存周转</h2>
+
+  <div class="chart-wrapper">
+    <img src="charts/08_price_turnover.png" alt="价格档位与周转">
+    <p class="chart-caption">图 12：左 — 价格档位营收占比（饼图）；右 — 各品类平均周转率</p>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h3>价格档位营收</h3>
+      <table>
+        <thead><tr><th>档位</th><th>营收（万元）</th><th>占比</th></tr></thead>
+        <tbody>
+          <tr><td>低价</td><td>880</td><td>8.2%</td></tr>
+          <tr><td>中价</td><td>3,133</td><td>29.2%</td></tr>
+          <tr><td class="best">高价</td><td class="best">6,704</td><td class="best">62.6%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h3>品类周转率</h3>
+      <table>
+        <thead><tr><th>品类</th><th>周转率</th></tr></thead>
+        <tbody>
+          <tr><td class="best">文具办公</td><td class="best">64.0%</td></tr>
+          <tr><td>生活用品</td><td>62.0%</td></tr>
+          <tr><td>美妆护肤</td><td>58.8%</td></tr>
+          <tr><td>数码配件</td><td>52.4%</td></tr>
+          <tr><td class="worst">玩具礼品</td><td class="worst">41.2%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="insight">
+    <strong>高价档位贡献了 62.6% 的营收，但只占少部分 SKU。</strong>这与直觉相符：MINISO 的消费者并非只买便宜货，而是愿意为价值感更高的产品买单。这也解释了为什么价格和销量的相关性几乎为零（见第八章统计检验）——用户对价格不敏感。
+  </div>
+  <div class="insight blue">
+    <strong>周转率反映了品类的动销效率。</strong>文具办公 64% 的周转率意味着货架上的商品大约每 1.6 个周期就会完成一次更替，是动销最快的品类。玩具礼品 41.2% 的周转率最低——它本身销量小、单品体量大（毛绒玩具等），货架占用时间长。这类品类适合<strong>减少常备 SKU、在节假日高峰前集中补货</strong>，而非全年均匀铺货。
+  </div>
+</div>
+
+<!-- ═══════════════ 9. 统计检验 ═══════════════ -->
+<div class="section" id="s9">
+  <h2 class="section-title">八、统计显著性检验</h2>
+  <p style="color:var(--text-light); margin-bottom:20px;">以下检验全部使用 SciPy 库完成。p 值 &lt; 0.001 表示差异在统计学上"极显著"——即该差异由随机波动导致的概率不足千分之一。</p>
+
+  <div class="chart-wrapper">
+    <img src="charts/12_correlation_heatmap.png" alt="相关性矩阵">
+    <p class="chart-caption">图 13：关键变量的 Pearson 相关系数矩阵</p>
+  </div>
+
+  <!-- Test 1 -->
+  <div class="card">
+    <h3>检验一：有促销 vs 无促销（Welch's t-test）</h3>
+    <div class="stat-row">
+      <div class="stat-badge"><div class="val">107.2</div><div class="lbl">有促销日均销量</div></div>
+      <div class="stat-badge"><div class="val">67.7</div><div class="lbl">无促销日均销量</div></div>
+      <div class="stat-badge"><div class="val">+58.3%</div><div class="lbl">提升幅度</div></div>
+      <div class="stat-badge"><div class="val" style="color:var(--success);">t = 37.22</div><div class="lbl">检验统计量</div></div>
+      <div class="stat-badge"><div class="val" style="color:var(--success);">p ≈ 0</div><div class="lbl">极显著 ***</div></div>
+    </div>
+    <p style="color:var(--text-light);">结论：促销对销量的提升是<strong>真实存在的</strong>，不是随机波动。两组均值差异高达 39.5 件/天，t 值 37.22 远大于常规阈值 1.96。</p>
+  </div>
+
+  <!-- Test 2 -->
+  <div class="card">
+    <h3>检验二：品类间差异（One-way ANOVA）</h3>
+    <table>
+      <thead><tr><th>品类</th><th>日均销量均值</th><th>标准差</th><th>解读</th></tr></thead>
+      <tbody>
+        <tr><td class="td-left best">文具办公</td><td class="best">150.7</td><td>64.5</td><td class="td-left">绝对领先，波动也大</td></tr>
+        <tr><td class="td-left">生活用品</td><td>122.9</td><td>50.6</td><td class="td-left">稳定第二</td></tr>
+        <tr><td class="td-left">美妆护肤</td><td>99.0</td><td>40.7</td><td class="td-left">中游，波动最小</td></tr>
+        <tr><td class="td-left">数码配件</td><td>74.1</td><td>30.0</td><td class="td-left">偏低，波动最小</td></tr>
+        <tr><td class="td-left worst">玩具礼品</td><td class="worst">49.5</td><td>20.4</td><td class="td-left">销量最低，波动也最小</td></tr>
+      </tbody>
+    </table>
+    <div class="stat-row">
+      <div class="stat-badge"><div class="val" style="color:var(--success);">F = 1486.65</div><div class="lbl">检验统计量</div></div>
+      <div class="stat-badge"><div class="val" style="color:var(--success);">p ≈ 0</div><div class="lbl">极显著 ***</div></div>
+    </div>
+    <p style="color:var(--text-light);">F 值高达 1486，说明品类间的销量差异<strong>远超品类内部的随机波动</strong>。这意味着品类选择是决定销量的核心因素。</p>
+  </div>
+
+  <!-- Test 3 -->
+  <div class="card">
+    <h3>检验三：促销类型间差异（One-way ANOVA，仅限促销记录）</h3>
+    <table>
+      <thead><tr><th>促销类型</th><th>日均销量均值</th><th>标准差</th></tr></thead>
+      <tbody>
+        <tr><td class="td-left best">限时特价</td><td class="best">118.1</td><td>62.8</td></tr>
+        <tr><td class="td-left">买赠</td><td>107.2</td><td>56.8</td></tr>
+        <tr><td class="td-left">打折</td><td>103.3</td><td>58.1</td></tr>
+        <tr><td class="td-left worst">满减</td><td class="worst">99.7</td><td>52.9</td></tr>
+      </tbody>
+    </table>
+    <div class="stat-row">
+      <div class="stat-badge"><div class="val" style="color:var(--success);">F = 34.58</div><div class="lbl">检验统计量</div></div>
+      <div class="stat-badge"><div class="val" style="color:var(--success);">p ≈ 0</div><div class="lbl">极显著 ***</div></div>
+    </div>
+    <p style="color:var(--text-light);">四种促销方式之间的差异虽然不如品类间差异那么大（F=34.58 vs 1486），但仍然是<strong>统计极显著的</strong>。限时特价确实系统性地优于满减。</p>
+  </div>
+
+  <!-- Test 4 -->
+  <div class="card">
+    <h3>检验四：天气对销量的影响（One-way ANOVA）</h3>
+    <div class="stat-row">
+      <div class="stat-badge"><div class="val" style="color:var(--success);">F = 249.24</div><div class="lbl">检验统计量</div></div>
+      <div class="stat-badge"><div class="val" style="color:var(--success);">p ≈ 0</div><div class="lbl">极显著 ***</div></div>
+    </div>
+    <p style="color:var(--text-light);">天气间的销量差异在统计上是显著的。但 ANOVA 只能告诉你"至少有一组不同"，不能排除季节、节假日等混杂因素的干扰。建议将天气视为<strong>参考信号</strong>而非独立因果变量。</p>
+  </div>
+
+  <!-- Test 5 -->
+  <div class="card">
+    <h3>检验五：价格与销量的相关性（Pearson r）</h3>
+    <div class="stat-row">
+      <div class="stat-badge"><div class="val">r = 0.0103</div><div class="lbl">相关系数</div></div>
+      <div class="stat-badge"><div class="val" style="color:var(--danger);">p = 0.327</div><div class="lbl">不显著</div></div>
+    </div>
+    <p style="color:var(--text-light);">这是全部检验中<strong>唯一不显著的结果</strong>——而且这正是最有价值的信息。价格和销量之间几乎没有任何线性关系（r ≈ 0.01），p = 0.327 意味着我们无法拒绝"相关系数为零"的原假设。<strong>这意味着在 MINISO 的价格带内（约 ¥10-300），涨价不会明显抑制需求，降价也不会明显刺激需求。</strong>这为"促销可持续"提供了经济学基础：限时特价的 +74.4% 提升可能更多来自<strong>行为心理学效应</strong>（限时=稀缺=冲动购买），而非单纯的价格弹性。</p>
+  </div>
+
+  <!-- Test 6 -->
+  <div class="card">
+    <h3>检验六：节假日 vs 非节假日（Welch's t-test）</h3>
+    <div class="stat-row">
+      <div class="stat-badge"><div class="val">150.3</div><div class="lbl">节假日日均销量</div></div>
+      <div class="stat-badge"><div class="val">97.4</div><div class="lbl">非节假日日均销量</div></div>
+      <div class="stat-badge"><div class="val">+54.4%</div><div class="lbl">提升幅度</div></div>
+      <div class="stat-badge"><div class="val" style="color:var(--success);">t = 10.52</div><div class="lbl">检验统计量</div></div>
+      <div class="stat-badge"><div class="val" style="color:var(--success);">p ≈ 0</div><div class="lbl">极显著 ***</div></div>
+    </div>
+    <p style="color:var(--text-light);">节假日效应极显著。但需注意节假日样本仅 325 条（3.6%），且节假日与促销高度重叠。建议将"节假日+促销"视为一个<strong>组合策略</strong>而非两个独立变量。</p>
+  </div>
+</div>
+
+<!-- ═══════════════ 10. 业务建议 ═══════════════ -->
+<div class="section" id="s10">
+  <h2 class="section-title">九、业务建议与行动清单</h2>
+
+  <div class="conclusion-grid">
+    <div class="conclusion-item">
+      <h4>1. 促销资源倾斜</h4>
+      <p>将促销预算和排期优先分配给<strong>限时特价</strong>，减少满减类活动的占比。限时特价在全品类、全价格档位都是最优解，不存在需要"看情况"选择的场景。</p>
+    </div>
+    <div class="conclusion-item">
+      <h4>2. 品类货架策略</h4>
+      <p><strong>文具办公</strong>保持最优货架位和高库存水位；<strong>玩具礼品</strong>压缩常备 SKU，在节假日前 2 周集中铺货；<strong>数码配件</strong>维持少量高价款作为利润补充。</p>
+    </div>
+    <div class="conclusion-item">
+      <h4>3. 季节备货节奏</h4>
+      <p>5月中下旬开始加大备货（迎接 6-8 月高峰），8 月是全年储备的最高峰；1-2 月适当压缩库存和人力，2 月春节可作为闭店/盘点窗口。</p>
+    </div>
+    <div class="conclusion-item">
+      <h4>4. 节假日营销日历</h4>
+      <p>节假日销量提升 54.4%，提前 2 周做好：爆品备货量 ×1.5、限时特价排期、门店陈列调整。节假日是"放大器"，促销是"扳机"——两者缺一不可。</p>
+    </div>
+    <div class="conclusion-item">
+      <h4>5. 工作日运营保障</h4>
+      <p>工作日（尤其周一至周四）贡献了大部分销量。确保工作日门店人员充足、收银不排长队、货架丰满度维持高位。周末可适当缩减人力配置。</p>
+    </div>
+    <div class="conclusion-item">
+      <h4>6. 价格策略信心</h4>
+      <p>价格与销量相关性 r=0.01 说明用户价格敏感度极低。这给了两个方向的决策空间：(1) 高价值新品可以定更高价位；(2) 促销的增量主要来自行为心理学（稀缺效应）而非降价本身，<strong>不需要过度打折</strong>。</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ Footer ═══════════════ -->
+<div class="footer">
+  <p>报告由 analysis.py 自动生成数据 | 可视化：Seaborn + Matplotlib（13 张图表）| 统计检验：SciPy（6 项检验）| SQL 查询：SQLite（6 条多维聚合）</p>
+  <p style="margin-top:8px;">数据时间范围：2023-01-01 ~ 2023-12-31 | 生成日期：2026-05-14</p>
+</div>
+
+</div>
+</body>
+</html>

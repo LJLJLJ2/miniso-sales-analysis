@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MINISO 价格弹性与促销ROI分析</title>
+<style>
+  :root {
+    --primary: #1b4b5e; --accent: #e8733a; --blue: #4ca6ba; --gold: #c39858;
+    --bg: #f5f5f5; --card: #fff; --text: #263238;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.8;
+  }
+
+  .hero {
+    background: linear-gradient(135deg, #1b4b5e, #283593);
+    color: #fff; padding: 60px 40px 50px; text-align: center;
+  }
+  .hero h1 { font-size: 2.4em; font-weight: 800; letter-spacing: 2px; margin-bottom: 8px; }
+  .hero .sub { font-size: 1.1em; opacity: 0.85; font-weight: 300; }
+  .hero .tags { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+  .hero .tag { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); padding: 6px 18px; border-radius: 20px; font-size: 0.9em; }
+
+  .container { max-width: 1000px; margin: 0 auto; padding: 0 20px; }
+  .section-title {
+    font-size: 1.8em; font-weight: 700; color: var(--primary);
+    text-align: center; margin: 48px 0 24px;
+  }
+  .section-title::after { content: ''; display: block; width: 50px; height: 3px; background: var(--accent); margin: 10px auto 0; border-radius: 2px; }
+
+  /* KPI cards */
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin: 20px 0 32px; }
+  .kpi-card {
+    background: var(--card); border-radius: 12px; padding: 22px 18px; text-align: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05); border-top: 3px solid var(--blue);
+  }
+  .kpi-card .val { font-size: 2em; font-weight: 800; color: var(--primary); }
+  .kpi-card .lbl { font-size: 0.85em; color: #888; margin-top: 4px; }
+  .kpi-card.highlight { border-top-color: var(--accent); }
+
+  /* Content cards */
+  .card {
+    background: var(--card); border-radius: 12px; padding: 28px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 24px;
+  }
+  .card h3 { color: var(--primary); font-size: 1.2em; margin-bottom: 16px; }
+  .card h3 .badge { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 0.7em; margin-left: 8px; vertical-align: middle; }
+  .badge-green { background: #e8f5e9; color: #2e7d32; }
+  .badge-orange { background: #fff3e0; color: #e65100; }
+  .badge-blue { background: #e3f2fd; color: #1565c0; }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; font-size: 0.9em; margin: 12px 0; }
+  th { background: var(--primary); color: #fff; padding: 10px 14px; text-align: left; font-weight: 600; }
+  th:first-child { border-radius: 6px 0 0 0; } th:last-child { border-radius: 0 6px 0 0; }
+  td { padding: 9px 14px; border-bottom: 1px solid #e0e0e0; }
+  tr:hover td { background: #fafafa; }
+  tr.row-hi td { background: #fff8e1; }
+
+  /* Insights */
+  .insight-box {
+    padding: 16px 20px; border-radius: 10px; margin: 16px 0;
+    font-size: 0.92em; line-height: 1.7;
+  }
+  .insight-green { background: #e8f5e9; border-left: 4px solid #2e7d32; }
+  .insight-orange { background: #fff3e0; border-left: 4px solid #e65100; }
+  .insight-blue { background: #e3f2fd; border-left: 4px solid #1565c0; }
+
+  /* Charts */
+  .chart-wrap { text-align: center; margin: 20px 0; }
+  .chart-wrap img { max-width: 100%; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+
+  /* Two-column */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+
+  .footer { text-align: center; padding: 32px; color: #999; font-size: 0.85em; }
+
+  .logic-flow {
+    display: flex; justify-content: center; align-items: center; gap: 12px;
+    flex-wrap: wrap; padding: 20px; background: #fafafa; border-radius: 10px; margin: 16px 0;
+  }
+  .logic-step {
+    background: var(--primary); color: #fff; padding: 10px 18px; border-radius: 8px;
+    font-size: 0.9em; font-weight: 600; white-space: nowrap;
+  }
+  .logic-arrow { color: var(--accent); font-size: 1.2em; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <h1>MINISO 2023 价格弹性与促销 ROI 分析</h1>
+  <div class="sub">方案三 · 从「描述→预测」到「决策建议」</div>
+  <div class="tags">
+    <span class="tag">价格弹性</span><span class="tag">促销ROI</span>
+    <span class="tag">定价优化</span><span class="tag">计量经济学</span><span class="tag">业务决策</span>
+  </div>
+</header>
+
+<div class="container">
+
+<!-- 分析逻辑链 -->
+<h2 class="section-title">分析逻辑链</h2>
+<div class="logic-flow">
+  <span class="logic-step">价格变动 → 销量变化？</span>
+  <span class="logic-arrow">→</span>
+  <span class="logic-step">哪种促销最有效？</span>
+  <span class="logic-arrow">→</span>
+  <span class="logic-step">每花 ¥1 促销成本赚回多少？</span>
+  <span class="logic-arrow">→</span>
+  <span class="logic-step">各产品应该怎么定价和促销？</span>
+</div>
+
+<!-- KPI 总览 -->
+<h2 class="section-title">核心发现一览</h2>
+<div class="kpi-grid">
+  <div class="kpi-card">
+    <div class="val">≈ 0</div>
+    <div class="lbl">整体价格弹性</div>
+  </div>
+  <div class="kpi-card highlight">
+    <div class="val">+74.4%</div>
+    <div class="lbl">限时特价 销量提升</div>
+  </div>
+  <div class="kpi-card">
+    <div class="val">3.60</div>
+    <div class="lbl">买赠 ROI（最高）</div>
+  </div>
+  <div class="kpi-card">
+    <div class="val">0.72</div>
+    <div class="lbl">打折 ROI（最低）</div>
+  </div>
+</div>
+
+<!-- ====== 第一部分：价格弹性 ====== -->
+<h2 class="section-title">一、价格弹性分析</h2>
+
+<div class="card">
+  <h3>什么是价格弹性？ <span class="badge badge-blue">一分钟看懂</span></h3>
+  <div class="insight-box insight-blue">
+    <strong>价格弹性 = 价格变 1%，销量变 X%。</strong><br>
+    · 弹性 = −2 → 涨价 10%，销量跌 20%（<strong>敏感品</strong>，适合降价冲量）<br>
+    · 弹性 = −0.1 → 涨价 10%，销量只跌 1%（<strong>刚需品</strong>，适合提价增收）<br>
+    · 弹性 = 0 → 价格和销量几乎没关系
+  </div>
+</div>
+
+<div class="card">
+  <h3>整体价格弹性：接近零 <span class="badge badge-orange">重要发现</span></h3>
+  <p>使用对数-对数回归模型（控制促销类型、季节、节假日、周末效应后），整体价格弹性仅为 <strong>0.001</strong>。</p>
+  <div class="insight-box insight-orange">
+    <strong>这意味着什么？</strong><br>
+    在 MINISO 的价格区间（¥10–300）内，<strong>单纯调整价格几乎不会直接影响销量</strong>。<br>
+    这不是坏事——恰恰说明 MINISO 的产品定价处于消费者「不敏感」区间。<br>
+    真正驱动销量的不是价格本身，而是 <strong>促销方式</strong>（限时、买赠、满减…）和 <strong>产品本身的需求</strong>。
+  </div>
+</div>
+
+<div class="chart-wrap">
+  <img src="elasticity_charts/price_elasticity.png" alt="各产品价格弹性">
+  <p style="color:#888;font-size:0.85em;margin-top:6px;">▲ 24 个产品的价格弹性均接近零，无一超过 |0.05|</p>
+</div>
+
+<div class="card">
+  <h3>各品类价格弹性</h3>
+  <table>
+    <thead><tr><th>品类</th><th>平均弹性</th><th>产品数</th><th>日均价</th><th>日均销量</th><th>解读</th></tr></thead>
+    <tbody>
+      <tr><td>美妆护肤</td><td>-0.0124</td><td>5</td><td>¥116</td><td>99 件</td><td>轻微敏感，可小幅降价冲量</td></tr>
+      <tr><td>数码配件</td><td>-0.0031</td><td>5</td><td>¥117</td><td>74 件</td><td>接近零弹性</td></tr>
+      <tr><td>玩具礼品</td><td>+0.0003</td><td>5</td><td>¥117</td><td>50 件</td><td>完全不敏感</td></tr>
+      <tr><td>文具办公</td><td>+0.0045</td><td>4</td><td>¥119</td><td>153 件</td><td>轻微正向（高价反而多卖？受促销叠加影响）</td></tr>
+      <tr><td>生活用品</td><td>+0.0124</td><td>5</td><td>¥120</td><td>125 件</td><td>同文具，促销信号强于价格信号</td></tr>
+    </tbody>
+  </table>
+  <div class="insight-box insight-green">
+    <strong>为什么弹性这么小？</strong><br>
+    1. <strong>价格变动被促销淹没</strong>：数据中「降价」通常伴随「限时特价」标签，消费者是对「限时」而非「低价」做出反应<br>
+    2. <strong>定价区间窄</strong>：¥10–300 的小商品，消费者对价格不敏感<br>
+    3. <strong>品牌定价稳定</strong>：MINISO 作为品牌零售，很少大幅调价
+  </div>
+</div>
+
+<!-- ====== 第二部分：促销效果 ====== -->
+<h2 class="section-title">二、促销效果分析</h2>
+
+<div class="card">
+  <h3>哪种促销最有效？</h3>
+  <p>以「无促销」日均销量 67.7 件为基线，四种促销方式的效果对比如下。所有促销的 P 值均 < 0.0001，效果 <strong>极其显著</strong>。</p>
+</div>
+
+<div class="two-col">
+  <div class="card">
+    <h3>销量提升排名</h3>
+    <table>
+      <thead><tr><th>促销方式</th><th>日均销量</th><th>提升幅度</th></tr></thead>
+      <tbody>
+        <tr class="row-hi"><td>🏷️ 限时特价</td><td>118.1 件</td><td><strong>+74.4%</strong></td></tr>
+        <tr><td>🎁 买赠</td><td>107.2 件</td><td>+58.3%</td></tr>
+        <tr><td>🏷️ 打折</td><td>103.3 件</td><td>+52.6%</td></tr>
+        <tr><td>🧮 满减</td><td>99.7 件</td><td>+47.2%</td></tr>
+        <tr><td>— 无促销</td><td>67.7 件</td><td>基线</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="chart-wrap">
+    <img src="elasticity_charts/promotion_lift.png" alt="促销效果对比" style="width:100%;">
+  </div>
+</div>
+
+<div class="card">
+  <h3>促销 × 价格带交叉分析</h3>
+  <p>同样的促销方式，对不同价格带的产品效果有差异吗？</p>
+  <div class="chart-wrap">
+    <img src="elasticity_charts/promo_price_heatmap.png" alt="促销×价格带热力图" style="max-width:500px;">
+  </div>
+  <p style="text-align:center;color:#888;font-size:0.85em;">结论：<strong>价格带对促销效果几乎没有影响</strong>——高价品和低价品对同一种促销的反应高度一致。</p>
+</div>
+
+<!-- ====== 第三部分：ROI ====== -->
+<h2 class="section-title">三、促销 ROI 估算</h2>
+
+<div class="card">
+  <h3>每花 ¥1 促销成本，能赚回多少？</h3>
+  <p>基于行业典型折扣率估算（限时特价-15%、打折-20%、满减-10%、买赠-8%），计算每种促销的投入产出比。</p>
+  <table>
+    <thead><tr><th>促销</th><th>增量销量/天</th><th>日促销成本</th><th>日增量收入</th><th>ROI</th><th>评价</th></tr></thead>
+    <tbody>
+      <tr class="row-hi"><td>🎁 买赠</td><td>+39.5 件</td><td>¥1,030</td><td>¥3,715</td><td><strong>3.60</strong></td><td>⭐⭐⭐ 最佳</td></tr>
+      <tr><td>🧮 满减</td><td>+32.0 件</td><td>¥1,182</td><td>¥2,607</td><td><strong>2.21</strong></td><td>⭐⭐ 优秀</td></tr>
+      <tr><td>🏷️ 限时特价</td><td>+50.4 件</td><td>¥2,082</td><td>¥3,841</td><td><strong>1.84</strong></td><td>⭐⭐ 良好</td></tr>
+      <tr><td>🏷️ 打折</td><td>+35.6 件</td><td>¥2,392</td><td>¥1,730</td><td><strong>0.72</strong></td><td>⚠️ 低于盈亏线</td></tr>
+    </tbody>
+  </table>
+  <div class="insight-box insight-orange">
+    <strong>关键结论：</strong><br>
+    · <strong>买赠</strong> 投入产出比最高（3.60），因为赠品成本低但感知价值高——消费者觉得「白送一个」，实际成本远低于直接打折<br>
+    · <strong>打折</strong> ROI 只有 0.72，意味着每投入 ¥1 只收回 ¥0.72，是赔本买卖——直接打折是最「贵」的促销方式<br>
+    · <strong>限时特价</strong> 销量提升最大（+50 件/天），适合冲量场景；综合考虑 ROI，买赠和满减更优
+  </div>
+</div>
+
+<div class="chart-wrap">
+  <img src="elasticity_charts/promotion_roi.png" alt="促销ROI对比" style="max-width:550px;">
+  <p style="color:#888;font-size:0.85em;margin-top:6px;">▲ ROI > 1（虚线右侧）= 促销是赚钱的；ROI < 1 = 赔本赚吆喝</p>
+</div>
+
+<!-- ====== 第四部分：优化建议 ====== -->
+<h2 class="section-title">四、综合优化建议</h2>
+
+<div class="card">
+  <h3>🎯 分产品定价与促销策略</h3>
+  <p>由于所有产品价格弹性均接近零，<strong>定价策略的重点不是「定多少价」，而是「用什么方式促销」</strong>。</p>
+  <table>
+    <thead><tr><th>产品类型</th><th>特征</th><th>推荐定价策略</th><th>推荐促销方式</th></tr></thead>
+    <tbody>
+      <tr><td>全部 24 款产品</td><td>价格弹性 ≈ 0</td><td>维持现有定价体系，无需大幅调价</td><td>—</td></tr>
+      <tr class="row-hi"><td>冲量型（高销量产品）</td><td>文具、生活用品（日均 125-153 件）</td><td>微调价格影响不大</td><td><strong>限时特价</strong>冲峰值，<strong>买赠</strong>提 ROI</td></tr>
+      <tr><td>利润型（低销量高价品）</td><td>数码配件、美妆（日均 74-99 件）</td><td>可尝试小幅提价（弹性为负但很小）</td><td><strong>满减</strong>（ROI 2.21，成本可控）</td></tr>
+      <tr><td>走量型（低销量低价品）</td><td>玩具礼品（日均 50 件）</td><td>降价空间有限</td><td><strong>买赠</strong>（ROI 最高 3.60）</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h3>📋 三条可落地的业务建议</h3>
+  <div class="insight-box insight-green">
+    <strong>建议一：促销预算优先给「买赠」，其次「满减」。</strong><br>
+    买赠的 ROI 是打折的 5 倍。同样的促销预算，买赠能带来 5 倍的增量收入。赠品选低成本、高感知价值的小物件（如 MINISO 自有小商品），进一步压低成本。
+  </div>
+  <div class="insight-box insight-blue">
+    <strong>建议二：「打折」是陷阱，能不用就不用。</strong><br>
+    直接打折 ROI 只有 0.72——不仅不赚钱，还在亏。打折同时向消费者传递「这个产品不值原价」的信号，长期损伤品牌价格体系。如果必须降价，套上「限时特价」的壳子。
+  </div>
+  <div class="insight-box insight-orange">
+    <strong>建议三：定价不用纠结，把精力花在选促销方式上。</strong><br>
+    数据分析明确显示：在 ¥10–300 这个价格区间，消费者对价格不敏感。与其花时间研究「降 5 块还是降 10 块」，不如设计更吸引人的促销玩法。
+  </div>
+</div>
+
+<div class="chart-wrap">
+  <img src="elasticity_charts/elasticity_vs_sales.png" alt="弹性与销量关系" style="max-width:600px;">
+</div>
+
+<!-- ====== 方法论 ====== -->
+<h2 class="section-title">分析方法说明</h2>
+<div class="card">
+  <table>
+    <thead><tr><th>分析模块</th><th>方法</th><th>关键参数</th></tr></thead>
+    <tbody>
+      <tr><td>价格弹性</td><td>对数-对数回归 (Log-Log OLS)</td><td>控制变量：促销类型、季节、天气、节假日、星期</td></tr>
+      <tr><td>促销效果</td><td>独立样本 t 检验 vs 无促销基线</td><td>显著性水平 α = 0.05</td></tr>
+      <tr><td>促销 ROI</td><td>增量收入 / 促销成本</td><td>折扣率基于行业典型值估算</td></tr>
+      <tr><td>交叉分析</td><td>双因素交叉表 (Pivot Table)</td><td>促销 × 品类、促销 × 价格带</td></tr>
+    </tbody>
+  </table>
+</div>
+
+</div><!-- container -->
+
+<footer class="footer">
+  MINISO 2023 销售数据分析 · 方案三 · 价格弹性与促销 ROI &nbsp;|&nbsp; 2026
+</footer>
+</body>
+</html>

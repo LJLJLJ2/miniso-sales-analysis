@@ -1,0 +1,53 @@
+{
+  "调优前": {
+    "RandomForest": {
+      "模型": "RF 调优前",
+      "MAE": 16.2,
+      "RMSE": 22.4,
+      "R²": 0.6612,
+      "MAPE": 26.9
+    },
+    "XGBoost": {
+      "模型": "XGBoost 调优前",
+      "MAE": 16.2,
+      "RMSE": 22.6,
+      "R²": 0.6564,
+      "MAPE": 26.8
+    }
+  },
+  "调优后": {
+    "RandomForest": {
+      "模型": "RF 调优后",
+      "MAE": 16.1,
+      "RMSE": 22.3,
+      "R²": 0.6658,
+      "MAPE": 26.3,
+      "best_params": {
+        "n_estimators": 300,
+        "max_depth": "None",
+        "min_samples_split": 2,
+        "min_samples_leaf": 4,
+        "max_features": "None"
+      }
+    },
+    "XGBoost": {
+      "模型": "XGBoost 调优后",
+      "MAE": 16.0,
+      "RMSE": 22.1,
+      "R²": 0.6716,
+      "MAPE": 26.4,
+      "best_params": {
+        "n_estimators": 200,
+        "max_depth": 4,
+        "learning_rate": 0.05,
+        "subsample": 0.8,
+        "colsample_bytree": 1.0,
+        "min_child_weight": 3
+      }
+    }
+  },
+  "R²提升_RF": 0.0046,
+  "R²提升_XGB": 0.0152,
+  "MAE降低%_RF": 0.6,
+  "MAE降低%_XGB": 1.2
+}

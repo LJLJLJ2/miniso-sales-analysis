@@ -1,0 +1,35 @@
+{
+  "RandomForest": {
+    "MAE": 16.2,
+    "RMSE": 22.4,
+    "R2": 0.6612,
+    "MAPE": 26.9
+  },
+  "XGBoost": {
+    "MAE": 16.2,
+    "RMSE": 22.6,
+    "R2": 0.6564,
+    "MAPE": 26.8
+  },
+  "ARIMA_top5_avg": {
+    "MAE": 55.4,
+    "RMSE": 66.6,
+    "R2": null
+  },
+  "top_features_rf": [
+    "sales_7d_mean",
+    "weekday",
+    "sales_7d_std",
+    "weather_encoded",
+    "promotion_type_encoded",
+    "promotion_encoded",
+    "sales_30d_mean",
+    "sales_lag_1",
+    "is_holiday",
+    "sales_lag_30"
+  ],
+  "train_rows": 8350,
+  "test_rows": 775,
+  "n_features": 22,
+  "split_date": "2023-12-01"
+}

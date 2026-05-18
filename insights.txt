@@ -1,0 +1,14 @@
+MINISO 2023 Sales Data — Key Insights
+==================================================
+
+Data: 9125 rows, 2023-01-01 ~ 2023-12-31
+Total Revenue: ¥107,174,599
+Total Units: 905,530
+
+1. Best month: 8月 — ¥1066万
+2. Best category: 文具办公 — 30.0% of revenue
+3. Top product: 文件夹 (文具办公) — ¥707.9万
+4. Most effective promo: 限时特价 — +74.4% lift
+5. Holiday lift: +54.4% vs non-holiday
+6. Weekend lift: +-32.6% vs weekday
+7. Best season: 夏季 — ¥3114万

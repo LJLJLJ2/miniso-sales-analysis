@@ -1,0 +1,5 @@
+promotion_type,count,avg_sales,incremental_units,avg_price,discount_rate,promotion_cost_per_day,incremental_revenue_per_day,ROI
+买赠,1877,107.2,39.5,120.1,8%,1030.0,3715.0,3.605
+满减,1765,99.7,32.0,118.6,10%,1182.0,2607.0,2.206
+限时特价,1833,118.1,50.4,117.5,15%,2082.0,3841.0,1.845
+打折,1813,103.3,35.6,115.8,20%,2392.0,1730.0,0.723
