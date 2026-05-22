@@ -1,5 +1,7 @@
 # MINISO 2023 Sales Data Analysis
 
+> **在线报告：** [https://ljljlj2.github.io/miniso-sales-analysis/](https://ljljlj2.github.io/miniso-sales-analysis/)
+
 Comprehensive data analysis portfolio: exploratory analysis → machine learning prediction → price elasticity & promotion ROI. MINISO (名创优品) full-year 2023 sales data.
 
 ## Key Findings
@@ -42,6 +44,23 @@ Comprehensive data analysis portfolio: exploratory analysis → machine learning
 ├── prediction_charts/                 # 方案二：9张预测图表（含调优对比）
 └── elasticity_charts/                 # 方案三：6张弹性与ROI图表
 ```
+
+## Key Charts
+
+### 方案一 EDA — 促销效果对比
+![Promotion Effect](https://raw.githubusercontent.com/LJLJLJ2/miniso-sales-analysis/main/charts/05_promotion.png)
+
+*限时特价效果最强（+74.4%），买赠次之（+58.3%），四种促销方式均有显著正向效果（P<0.0001）*
+
+### 方案二 Prediction — 模型对比
+![Model Comparison](https://raw.githubusercontent.com/LJLJLJ2/miniso-sales-analysis/main/prediction_charts/model_comparison.png)
+
+*XGBoost (R²=0.67) 优于 Random Forest (R²=0.61) 和 ARIMA (R²=0.36)，调优后 MAE ±16 件/天*
+
+### 方案三 Elasticity — 促销 ROI 排名
+![Promotion ROI](https://raw.githubusercontent.com/LJLJLJ2/miniso-sales-analysis/main/elasticity_charts/promotion_roi.png)
+
+*买赠 ROI 3.60 > 满减 2.21 > 限时特价 1.84 > 打折 0.72，打折实际赔钱*
 
 ## Tools & Methods
 

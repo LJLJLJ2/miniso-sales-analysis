@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MINISO 2023 销售数据分析作品集</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: #f5f5f5; color: #1a1a1a; line-height: 1.6;
+  }
+  .hero {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #e94560 100%);
+    color: #fff; padding: 60px 24px; text-align: center;
+  }
+  .hero h1 { font-size: 2rem; margin-bottom: 8px; }
+  .hero p { font-size: 1rem; opacity: 0.85; max-width: 600px; margin: 0 auto; }
+  .container { max-width: 960px; margin: 0 auto; padding: 32px 24px; }
+  .card {
+    background: #fff; border-radius: 12px; padding: 28px; margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08); transition: box-shadow 0.2s;
+  }
+  .card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+  .card h2 { font-size: 1.25rem; margin-bottom: 8px; color: #16213e; }
+  .card .tag {
+    display: inline-block; font-size: 0.75rem; padding: 2px 10px;
+    border-radius: 12px; margin-right: 6px; margin-bottom: 12px;
+    background: #e8ecf1; color: #555;
+  }
+  .card .desc { font-size: 0.9rem; color: #666; margin-bottom: 16px; }
+  .card a {
+    display: inline-block; padding: 10px 24px; background: #e94560;
+    color: #fff; text-decoration: none; border-radius: 6px;
+    font-size: 0.9rem; font-weight: 500; transition: background 0.2s;
+  }
+  .card a:hover { background: #c73a52; }
+  .flow {
+    display: flex; align-items: center; justify-content: center;
+    gap: 16px; margin: 32px 0; flex-wrap: wrap;
+  }
+  .flow .step {
+    background: #fff; border-radius: 8px; padding: 16px 20px;
+    text-align: center; font-size: 0.85rem; box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  }
+  .flow .arrow { font-size: 1.5rem; color: #e94560; }
+  .footer { text-align: center; padding: 24px; font-size: 0.8rem; color: #999; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>MINISO 2023 销售数据分析</h1>
+  <p>名创优品全年销售数据 · 9,125 条记录 · 24 款产品 · 三方案递进分析</p>
+</div>
+
+<div class="container">
+  <div class="flow">
+    <div class="step"><strong>方案一</strong><br>描述：发生了什么？</div>
+    <div class="arrow">→</div>
+    <div class="step"><strong>方案二</strong><br>预测：接下来会怎样？</div>
+    <div class="arrow">→</div>
+    <div class="step"><strong>方案三</strong><br>决策：应该怎么做？</div>
+  </div>
+
+  <div class="card">
+    <h2>方案一：探索性数据分析 (EDA)</h2>
+    <div class="tag">Pandas</div><div class="tag">Matplotlib</div><div class="tag">SciPy</div>
+    <p class="desc">8 维度探索分析，13 张可视化图表。覆盖时间趋势、品类结构、产品排行、促销效果、季节性、天气/假日影响、价格-周转关系和相关性分析。</p>
+    <a href="分析报告.html">查看报告 →</a>
+  </div>
+
+  <div class="card">
+    <h2>方案二：销量预测建模</h2>
+    <div class="tag">Random Forest</div><div class="tag">XGBoost</div><div class="tag">ARIMA</div>
+    <p class="desc">三种模型对比预测每日销量，超参数调优后 XGBoost R² = 0.67，MAE ±16 件/天。含特征重要性分析、残差诊断和 30 天滚动预测。</p>
+    <a href="prediction_report.html">查看报告 →</a>
+  </div>
+
+  <div class="card">
+    <h2>方案三：价格弹性与促销 ROI 分析</h2>
+    <div class="tag">对数回归</div><div class="tag">t 检验</div><div class="tag">ROI 建模</div>
+    <p class="desc">24 款产品价格弹性测算 + 4 种促销方式 ROI 对比。核心发现：买赠 ROI 3.60，打折 ROI 仅 0.72；促销方式选择比定价策略更重要。</p>
+    <a href="elasticity_report.html">查看报告 →</a>
+  </div>
+</div>
+
+<div class="footer">
+  <p>Author: 周琳杰 &nbsp;|&nbsp; Statistics & Economics &nbsp;|&nbsp; <a href="https://github.com/LJLJLJ2/miniso-sales-analysis">GitHub Repo</a></p>
+</div>
+
+</body>
+</html>
