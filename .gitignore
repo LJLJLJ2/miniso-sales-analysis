@@ -2,3 +2,7 @@
 __pycache__/
 *.pyc
 .ipynb_checkpoints/
+
+# Raw data (download from Kaggle — see README Data Source section)
+miniso_sales_data.csv
+miniso_sales_data_features.csv

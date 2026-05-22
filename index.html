@@ -51,7 +51,7 @@
 
 <div class="hero">
   <h1>MINISO 2023 销售数据分析</h1>
-  <p>名创优品全年销售数据 · 9,125 条记录 · 24 款产品 · 三方案递进分析</p>
+  <p>名创优品全年销售数据 · 9,125 条记录 · 24 款产品 · 三方案递进分析<br><small style="opacity:0.7">数据来源: Kaggle MINISO Sales Dataset · 完整特征工程流水线见 GitHub Repo</small></p>
 </div>
 
 <div class="container">
@@ -73,7 +73,7 @@
   <div class="card">
     <h2>方案二：销量预测建模</h2>
     <div class="tag">Random Forest</div><div class="tag">XGBoost</div><div class="tag">ARIMA</div>
-    <p class="desc">三种模型对比预测每日销量，超参数调优后 XGBoost R² = 0.67，MAE ±16 件/天。含特征重要性分析、残差诊断和 30 天滚动预测。</p>
+    <p class="desc">三种模型对比预测每日销量。ARIMA（纯时序）R²仅0.36——销量不由季节驱动，由促销和定价等运营动作决定。XGBoost调优后R²=0.67，MAE±16件/天（均值~100件），可支撑周度备货计划和人力排班。含特征重要性分析和残差诊断。</p>
     <a href="prediction_report.html">查看报告 →</a>
   </div>
 
